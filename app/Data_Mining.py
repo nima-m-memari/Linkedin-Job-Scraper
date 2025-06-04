@@ -1,14 +1,18 @@
 import time
+import os
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
 
 class Data_Mining():
     def __init__(self):
-        self.driver = webdriver.Chrome()
+        path = os.path.join(os.path.dirname(__file__), "preq", "chromedriver.exe")
+        self.driver = webdriver.Chrome(service=Service(path))
 
-    def password(self, path:str):
+    def password(self):
+        path = os.path.join(os.path.dirname(__file__), "preq", "password.txt")
         with open(path, "r") as file:
             lines = file.readlines()
             USERNAME = (lines[0].split(":", 1))[1].strip()
@@ -16,7 +20,7 @@ class Data_Mining():
         return USERNAME, PASSWORD
 
     def login(self):
-        Username, Password = self.password(f"Linkedin-Job-Scraper/app/password.txt")
+        Username, Password = self.password()
         #opening login url
         self.driver.get("https://www.linkedin.com/login/")
         self.driver.maximize_window()
