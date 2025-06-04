@@ -1,4 +1,6 @@
 import time
+import csv
+import re
 import os
 
 from selenium import webdriver
@@ -8,12 +10,14 @@ from selenium.webdriver.chrome.service import Service
 
 class Data_Mining():
     def __init__(self):
-        path = os.path.join(os.path.dirname(__file__), "preq", "chromedriver.exe")
-        self.driver = webdriver.Chrome(service=Service(path))
+        #main path (Linkedin-Job-Scraper)
+        self.path = os.path.dirname(os.path.dirname(__file__))
+        driver_path = os.path.join(self.path, "app", "preq", "chromedriver.exe")
+        self.driver = webdriver.Chrome(service=Service(driver_path))
 
     def password(self):
-        path = os.path.join(os.path.dirname(__file__), "preq", "password.txt")
-        with open(path, "r") as file:
+        password_path = os.path.join(self.path, "app", "preq", "password.txt")
+        with open(password_path, "r") as file:
             lines = file.readlines()
             USERNAME = (lines[0].split(":", 1))[1].strip()
             PASSWORD = (lines[1].split(":", 1))[1].strip()
@@ -55,7 +59,73 @@ class Data_Mining():
         location_input.send_keys(Keys.RETURN)
         time.sleep(5)
 
+    def job_scraper(self, counts:int):
+        def loop_count(counts:int):
+            if counts:
+                if counts % 25 == 0:
+                    return counts//25
+                else:
+                    loop_counts = ((counts//25) + 1)
+                    return loop_counts
+            else:
+                return 1
+        
+        def clean_salary(text:str):
+            match = re.search(r"\$[\d.,K]+/?[a-z]+(?:\s*-\s*\$[\d.,K]+/?[a-z]+)?", text)
+            if match:
+                return match.group()
+            else:
+                return "None"
+
+        job_data = list()
+
+        for i in range(loop_count(counts)):
+            time.sleep(2)
+            jobs = self.driver.find_elements(By.XPATH, "//li[@data-occludable-job-id]")
+            for job in jobs:
+                self.driver.execute_script("arguments[0].scrollIntoView();", job)
+
+                try:
+                    job_id = job.get_attribute("data-occludable-job-id")
+
+                    job_title_element = job.find_element(By.XPATH, ".//a[contains(@class, 'job-card-container__link')]")
+                    job_title = job_title_element.text.strip()
+
+                    company_element = job.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]")
+                    company_name = company_element.text.strip()
+
+                    location_element = job.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__caption')]//li")
+                    location = location_element.text.strip()
+
+                    try:
+                        salary_element = job.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__metadata')]//li")
+                        salary = clean_salary(salary_element.text.strip())
+                    except:
+                        salary = "None"
+
+                    job_data.append({
+                        'ID': job_id,
+                        'Link': f"https://www.linkedin.com/jobs/view/{job_id}/",
+                        'Title': job_title,
+                        'Company': company_name,
+                        'Location': location,
+                        'Salary': salary
+                    })
+
+                except:
+                    continue
+            
+            time.sleep(2)
+            next_button_element = self.driver.find_element(By.XPATH, "//button[@aria-label='View next page']")
+            next_button_element.click()
+        
+        job_data_path = os.path.join(self.path, "app", "preq", "job_data.csv")
+        with open(job_data_path, "w", newline='', encoding='utf-8') as jobs_data:
+            writer = csv.DictWriter(jobs_data, fieldnames=["ID", "Link", "Title", "Company", "Location", "Salary"])
+            writer.writeheader()
+            writer.writerows(job_data)
+
 data = Data_Mining()
 data.login()
-data.jobs('python', 'united states')
-
+data.jobs('java', 'germany')
+data.job_scraper(50)
