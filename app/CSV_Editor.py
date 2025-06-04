@@ -1,6 +1,4 @@
-import re
-import os
-import csv
+from preq.preq import *
 
 class CSV_Editor():
     def __init__(self):
@@ -52,6 +50,3 @@ class CSV_Editor():
             os.remove(old_file_path)
         if os.path.exists(new_file_path):
             os.rename(new_file_path, old_file_path)
-
-x=CSV_Editor()
-x.edited_csv()

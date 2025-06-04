@@ -1,11 +1,4 @@
-import time
-import csv
-import os
-
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
+from preq.preq import *
 
 class Data_Mining():
     def __init__(self):
@@ -116,8 +109,3 @@ class Data_Mining():
             writer = csv.DictWriter(jobs_data, fieldnames=["ID", "Link", "Title", "Company", "Location", "Salary"])
             writer.writeheader()
             writer.writerows(job_data)
-
-data = Data_Mining()
-data.login()
-data.jobs('python', 'united state')
-data.job_scraper(50)
