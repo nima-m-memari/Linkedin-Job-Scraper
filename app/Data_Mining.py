@@ -7,31 +7,71 @@ class Data_Mining():
         driver_path = os.path.join(self.path, "app", "preq", "chromedriver.exe")
         self.driver = webdriver.Chrome(service=Service(driver_path))
 
-    def password(self):
-        password_path = os.path.join(self.path, "app", "preq", "password.txt")
-        with open(password_path, "r") as file:
-            lines = file.readlines()
-            USERNAME = (lines[0].split(":", 1))[1].strip()
-            PASSWORD = (lines[1].split(":", 1))[1].strip()
-        return USERNAME, PASSWORD
-
     def login(self):
-        Username, Password = self.password()
-        #opening login url
-        self.driver.get("https://www.linkedin.com/login/")
-        self.driver.maximize_window()
-        time.sleep(5)
-        #typing username
-        username_input = self.driver.find_element(By.ID, "username")
-        username_input.send_keys(Username)
-        time.sleep(1)
-        #typing password
-        password_input = self.driver.find_element(By.ID, "password")
-        password_input.send_keys(Password)
-        time.sleep(1)
-        #entering "Enter" key on keyboard
-        password_input.send_keys(Keys.RETURN)
-        time.sleep(5)
+        cookies_path = os.path.join(self.path, "app", "cache", "cookies.pkl")
+        driver = self.driver
+        
+        def is_logged_in():
+            try:
+                driver.find_element(By.ID, "global-nav")
+                return True
+            except:
+                return False            
+            
+        def save_cookies():
+            cookies = driver.get_cookies()
+            for cookie in cookies:
+                if cookie["name"] == "li_at":
+                    pickle.dump(cookie, open(cookies_path, "wb"))
+                    break
+        
+        def load_cookies():
+            if not os.path.exists(cookies_path):
+                return False
+            
+            cookies = pickle.load(open(cookies_path, "rb"))
+            
+            driver.get("https://www.linkedin.com/")
+            time.sleep(2)
+            try:
+                if cookies["name"] == "li_at":
+                    driver.add_cookie({
+                        "name": "li_at",
+                        "value": cookies["value"],
+                        "domain": ".linkedin.com"
+                    })
+            except:
+                pass
+            time.sleep(2)
+            
+            return True
+        
+        def start():            
+            #seeing if we can log in with cookies
+            if load_cookies():
+                driver.get("https://www.linkedin.com/")
+                time.sleep(2)
+                if is_logged_in():
+                    return
+                
+            #user must sign in
+            driver.get("https://www.linkedin.com/login/")
+            #it will wait until user signed in
+            while True:
+                if "/feed" in driver.current_url:
+                    break
+                time.sleep(1)
+            
+            #saving cookies for next time login
+            if is_logged_in():
+                save_cookies()
+        
+        start()
+
+    def log_out(self):
+        cookies_path = os.path.join(self.path, "app", "cache", "cookies.pkl")
+        if os.path.exists(cookies_path):
+            os.remove(cookies_path)
 
     def jobs(self, job_name:str, location:str):
         #opening jobs url
@@ -104,7 +144,7 @@ class Data_Mining():
             next_button_element = self.driver.find_element(By.XPATH, "//button[@aria-label='View next page']")
             next_button_element.click()
         
-        job_data_path = os.path.join(self.path, "app", "preq", "job_data.csv")
+        job_data_path = os.path.join(self.path, "app", "cache", "job_data.csv")
         with open(job_data_path, "w", newline='') as jobs_data:
             writer = csv.DictWriter(jobs_data, fieldnames=["ID", "Link", "Title", "Company", "Location", "Salary"])
             writer.writeheader()

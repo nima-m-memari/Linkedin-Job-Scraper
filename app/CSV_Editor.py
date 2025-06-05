@@ -15,8 +15,8 @@ class CSV_Editor():
     def edited_csv(self):
         fieldnames=["ID", "Link", "Title", "Company", "Location", "Salary", "Work Arrangement"]
         
-        job_data_path = os.path.join(self.path, "app", "preq", "job_data.csv")
-        temp_path = os.path.join(self.path, "app", "preq", "temp.csv")
+        job_data_path = os.path.join(self.path, "app", "cache", "job_data.csv")
+        temp_path = os.path.join(self.path, "app", "cache", "temp.csv")
         with open(job_data_path, 'r') as old:
             with open(temp_path, 'w', newline='') as new:
                 csv_reader = csv.DictReader(old)

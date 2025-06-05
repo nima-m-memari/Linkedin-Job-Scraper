@@ -3,3 +3,5 @@ temp.csv
 password.txt
 __pycache__/
 stuff/
+cache/
+static/
