@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pickle
+import signal
 import time
 import csv
 import re

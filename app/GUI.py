@@ -18,8 +18,7 @@ class Pages:
                 else:
                     st.session_state["name"] = name
                     st.success(f"Hello {name}")
-                    with st.spinner("Loading..."):
-                        time.sleep(2)
+                    self.loading("Loading...")
                     st.session_state["current_page"] = "login_page"
                     st.rerun()
         else:
@@ -38,13 +37,16 @@ class Pages:
             back_button = st.button("Back")
             if continue_button:
                 st.session_state["current_page"] = "job_page"
+                self.loading("Loading...")
                 st.rerun()
             elif sign_out_button:
                 Data_Mining().log_out()
+                self.loading("Signing Out...")
                 st.rerun()
             elif back_button:
                 del st.session_state["name"]
                 st.session_state["current_page"] = "home_page"
+                self.loading("Loading...")
                 st.rerun()
         else:
             st.write(f"Welcome Back {st.session_state["name"]}")
@@ -59,6 +61,7 @@ class Pages:
                 elif back_button:
                     del st.session_state["name"]
                     st.session_state["current_page"] = "home_page"
+                    self.loading("Loading...")
                     st.rerun()
             else:
                 sign_in_button = st.button("Sign In", disabled=True)
@@ -79,6 +82,7 @@ class Pages:
             submitted = st.form_submit_button("Search")
 
             if submitted:
+                self.loading("Loading...")
                 if (not job_title) or (not job_location):
                     st.warning("Please fill in both the Job Title and Job Location.")
                 else:
@@ -92,6 +96,7 @@ class Pages:
         back_button = st.button("Back")
         if back_button:
             st.session_state["current_page"] = "login_page"
+            self.loading("Loading...")
             st.rerun()
     
     def job_scraper(self):
@@ -143,11 +148,19 @@ class Pages:
 
         # نمایش جدول
         st.markdown(html_table, unsafe_allow_html=True)
-
+        
+        if st.button("Quit"):
+            self.loading("Quiting...")
+            os.kill(os.getpid(), signal.SIGTERM)
         # دکمه برگشت
         if st.button("Back"):
             st.session_state["current_page"] = "job_page"
+            self.loading("Loading...")
             st.rerun()
+
+    def loading(self, text:str):
+        with st.spinner(text):
+            time.sleep(2)
 
 if "pages_class" not in st.session_state:
     st.session_state["pages_class"] = Pages()
