@@ -18,7 +18,7 @@ class CSV_Editor():
         job_data_path = os.path.join(self.path, "app", "cache", "job_data.csv")
         temp_path = os.path.join(self.path, "app", "cache", "temp.csv")
         with open(job_data_path, 'r') as old:
-            with open(temp_path, 'w', newline='') as new:
+            with open(temp_path, 'w', encoding="utf-8", newline='') as new:
                 csv_reader = csv.DictReader(old)
                 csv_writer = csv.DictWriter(new, fieldnames=fieldnames)
                 csv_writer.writeheader()

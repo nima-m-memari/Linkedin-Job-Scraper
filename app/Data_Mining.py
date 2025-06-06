@@ -50,12 +50,14 @@ class Data_Mining():
             #seeing if we can log in with cookies
             if load_cookies():
                 driver.get("https://www.linkedin.com/")
+                driver.minimize_window()
                 time.sleep(2)
                 if is_logged_in():
                     return
                 
             #user must sign in
             driver.get("https://www.linkedin.com/login/")
+            driver.maximize_window()
             #it will wait until user signed in
             while True:
                 if "/feed" in driver.current_url:

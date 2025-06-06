@@ -1,11 +1,8 @@
-from preq.preq import *
-from Data_Mining import *
-from CSV_Editor import *
+import os
 
-x=Data_Mining()
-x.login()
-x.jobs("python", "united state")
-x.job_scraper(60)
-
-y=CSV_Editor()
-y.edited_csv()
+main_path = os.path.dirname(os.path.dirname(__file__))
+cache_path = os.path.join(main_path, "app", "cache", "cache.json")
+if os.path.exists(cache_path):
+    os.remove(cache_path)
+command = f"streamlit run \"{os.path.join(main_path, "app", "GUI.py")}\""
+os.system(command)
