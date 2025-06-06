@@ -1,7 +1,9 @@
 job_data.csv
 temp.csv
 password.txt
+cookies.pkl
+temp.csv
+job_data.csv
 __pycache__/
 stuff/
-cache/
 static/
