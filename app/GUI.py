@@ -113,46 +113,34 @@ class Pages:
         st.rerun()
 
     def show_jobs(self):
-        #This Function Is Made By ChatGPT
         st.set_page_config("Results", layout="wide")
         st.title("Job Results")
-
-        # بارگیری داده
         csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "app", "cache", "job_data.csv")
         df = pd.read_csv(csv_path)
-
-        # حذف ستون ID در صورت وجود
+        
         if "ID" in df.columns:
             df = df.drop(columns=["ID"])
 
-        # محدود کردن تعداد ردیف‌ها بر اساس مقدار ذخیره‌شده
         df = df.head(st.session_state.get("job_counts", len(df)))
-
-        # شماره‌گذاری از 1 و ساخت لینک کلیک‌پذیر
         df.insert(0, "No", range(1, len(df) + 1))
         df["Link"] = df["Link"].apply(lambda url: f"https://www.linkedin.com/jobs/view/{url.strip().split('/')[-2]}/")
-
-        # وسط‌چین کردن ستون‌های No و Link
         df["No"] = df["No"].apply(lambda x: f"<div style='text-align:center'>{x}</div>")
         df["Link"] = df["Link"].apply(lambda url: f"<div style='text-align:center'><a href='{url}' target='_blank'>View</a></div>")
 
-        # بزرگ کردن ستون Salary و جایگزینی — به جای مقادیر خالی
         if "Salary" in df.columns:
             df["Salary"] = df["Salary"].apply(
                 lambda val: f"<div style='min-width:150px'>{val}</div>" if pd.notna(val) else "<div style='min-width:150px; text-align:center'>—</div>"
             )
 
-        # تولید HTML و وسط‌چین کردن عنوان ستون‌ها
         html_table = df.to_html(escape=False, index=False)
         html_table = html_table.replace('<th>', "<th style='text-align:center'>")
 
-        # نمایش جدول
         st.markdown(html_table, unsafe_allow_html=True)
         
         if st.button("Quit"):
             self.loading("Quiting...")
             os.kill(os.getpid(), signal.SIGTERM)
-        # دکمه برگشت
+
         if st.button("Back"):
             st.session_state["current_page"] = "job_page"
             self.loading("Loading...")
