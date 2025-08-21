@@ -147,7 +147,7 @@ class Data_Mining():
             next_button_element.click()
         
         job_data_path = os.path.join(self.path, "app", "cache", "job_data.csv")
-        with open(job_data_path, "w", newline='') as jobs_data:
+        with open(job_data_path, "w", newline='', encoding="utf-8") as jobs_data:
             writer = csv.DictWriter(jobs_data, fieldnames=["ID", "Link", "Title", "Company", "Location", "Salary"])
             writer.writeheader()
             writer.writerows(job_data)

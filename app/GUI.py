@@ -120,11 +120,14 @@ class Pages:
         
         if "ID" in df.columns:
             df = df.drop(columns=["ID"])
-
+        #set amount of jobs that user wants
         df = df.head(st.session_state.get("job_counts", len(df)))
+        #set rows
         df.insert(0, "No", range(1, len(df) + 1))
         df["Link"] = df["Link"].apply(lambda url: f"https://www.linkedin.com/jobs/view/{url.strip().split('/')[-2]}/")
+        #center align
         df["No"] = df["No"].apply(lambda x: f"<div style='text-align:center'>{x}</div>")
+        #clickable link and center alignment
         df["Link"] = df["Link"].apply(lambda url: f"<div style='text-align:center'><a href='{url}' target='_blank'>View</a></div>")
 
         if "Salary" in df.columns:
@@ -133,6 +136,7 @@ class Pages:
             )
 
         html_table = df.to_html(escape=False, index=False)
+        #center alignment for columns
         html_table = html_table.replace('<th>', "<th style='text-align:center'>")
 
         st.markdown(html_table, unsafe_allow_html=True)
